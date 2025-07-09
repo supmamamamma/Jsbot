@@ -1,4 +1,20 @@
 // 引入必要的模块
+// 首先初始化環境配置
+const { initializeEnvironment } = require('./config/env-setup');
+
+// 初始化環境配置
+const envInit = initializeEnvironment();
+if (!envInit.success) {
+  console.error('❌ 環境配置初始化失敗，程序退出');
+  process.exit(1);
+}
+
+// 如果需要配置但 Discord Token 無效，給出警告但不退出
+if (envInit.needsConfiguration) {
+  console.log('⚠️  請完成配置後重新啟動機器人以獲得最佳體驗');
+}
+
+// 載入環境變量
 require('dotenv').config();
 const Discord = require("discord.js");
 const { REST } = require("@discordjs/rest");
@@ -25,6 +41,14 @@ const client = new Discord.Client({
 // Bot Token 和 Client ID
 const token = process.env.DISCORD_TOKEN;
 const clientId = "1362792276895596675";
+
+// 檢查 Discord Token 是否有效
+if (!token || token === 'YOUR_DISCORD_BOT_TOKEN_HERE') {
+  console.error('❌ Discord Token 未正確配置！');
+  console.log('💡 請打開 .env 文件並設置正確的 DISCORD_TOKEN');
+  console.log('   然後重新啟動機器人');
+  process.exit(1);
+}
 
 // 获取用户特定的OpenAI客户端
 function getUserOpenAI(userId) {

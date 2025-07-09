@@ -27,15 +27,26 @@
     npm install
     ```
 
-3.  **创建 `.env` 文件**
-    在项目根目录创建一个名为 `.env` 的文件，并添加您的机器人令牌：
+3.  **自動配置 (新功能!)**
+    首次運行機器人時，系統會自動檢查並創建 `.env` 配置文件：
+    
+    ```bash
+    npm start
+    ```
+    
+    如果沒有 `.env` 文件，系統會：
+    - 自動創建 `.env` 文件模板
+    - 顯示詳細的配置指南
+    - 提示您完成必要的配置步驟
+
+4.  **配置 Discord Token**
+    打開自動創建的 `.env` 文件，將 `YOUR_DISCORD_BOT_TOKEN_HERE` 替換為您的實際 Discord Bot Token：
 
     ```env
-    DISCORD_TOKEN="YOUR_DISCORD_BOT_TOKEN"
+    DISCORD_TOKEN="YOUR_ACTUAL_DISCORD_BOT_TOKEN"
     ```
-    请将 `YOUR_DISCORD_BOT_TOKEN` 替换为您自己的凭据。
 
-4.  **配置 AI**
+5.  **配置 AI**
     启动机器人后，您必须在 Discord 中使用 `/configai` 命令来配置您的 OpenAI API 密钥，然后才能使用 AI 功能。
     
     `/configai apikey: YOUR_OPENAI_API_KEY`
