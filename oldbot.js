@@ -27,6 +27,7 @@ const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
 const { configAICommand, getUserAIConfig } = require("./command/configai");
 const { touemoji, fangsuqi } = require("./command/getemoji");
 const { sendMessageCommand, handleSendMessage } = require("./command/send");
+const { setmeCommand } = require("./command/setme");
 // 创建一个新的 Discord 客户端
 const client = new Discord.Client({
   intents: [
@@ -159,6 +160,8 @@ const commands = [
   // 添加新的configai命令
   configAICommand.data.toJSON(),
   sendMessageCommand,
+  // 添加setme命令
+  setmeCommand.data.toJSON(),
 ];
 
 // 存储分页历史记录的对象
@@ -511,6 +514,9 @@ client.on("interactionCreate", async (interaction) => {
       await touemoji(interaction);
     } else if (commandName === "发送消息") {
       await handleSendMessage(interaction);
+    } else if (commandName === "setme") {
+      // 处理setme命令
+      await setmeCommand.execute(interaction);
     }
   }
 });
