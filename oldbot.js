@@ -28,6 +28,7 @@ const { configAICommand, getUserAIConfig } = require("./command/configai");
 const { touemoji, fangsuqi } = require("./command/getemoji");
 const { sendMessageCommand, handleSendMessage } = require("./command/send");
 const { setmeCommand } = require("./command/setme");
+const { cryptoCommands, handleCrypto } = require("./command/crypto.js");
 // 创建一个新的 Discord 客户端
 const client = new Discord.Client({
   intents: [
@@ -162,6 +163,8 @@ const commands = [
   sendMessageCommand,
   // 添加setme命令
   setmeCommand.data.toJSON(),
+  // 添加加密和解密命令
+  ...cryptoCommands,
 ];
 
 // 存储分页历史记录的对象
@@ -517,6 +520,8 @@ client.on("interactionCreate", async (interaction) => {
     } else if (commandName === "setme") {
       // 处理setme命令
       await setmeCommand.execute(interaction);
+    } else if (commandName === '加密' || commandName === '解密') {
+      await handleCrypto(interaction);
     }
   }
 });
