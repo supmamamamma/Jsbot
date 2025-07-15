@@ -408,19 +408,54 @@ client.on("interactionCreate", async (interaction) => {
         // 获取用户特定的OpenAI客户端
         const userOpenAI = getUserOpenAI(userId);
 
-        // 调用 OpenAI API，传递完整的对话历史
-        const response = await userOpenAI.chat.completions.create({
-          model: userConfig.model || "google/gemini-2.0-flash-001", // 使用用户配置的模型
-          messages: apiMessages,
-          max_tokens: userConfig.max_tokens || 2048,
-          temperature: userConfig.temperature || 1.0,
-          top_p: userConfig.top_p || 0.9,
-        });
-        // 获取 AI 的回复
-        const aiResponse = response.choices[0].message.content;
+        // 调用 OpenAI API
+        if (userConfig.stream) {
+          const stream = await userOpenAI.chat.completions.create({
+            model: userConfig.model || "google/gemini-2.0-flash-001",
+            messages: apiMessages,
+            max_tokens: userConfig.max_tokens || 2048,
+            temperature: userConfig.temperature || 1.0,
+            top_p: userConfig.top_p || 0.9,
+            stream: true,
+          });
 
-        // 添加AI回复到对话历史
-        conversations[userId].push({ role: "assistant", content: aiResponse });
+          let fullResponse = "";
+          let lastUpdateTime = 0;
+          const updateInterval = 1000; // 1秒
+
+          for await (const chunk of stream) {
+            fullResponse += chunk.choices[0]?.delta?.content || "";
+            const now = Date.now();
+            if (now - lastUpdateTime > updateInterval) {
+              if (fullResponse.length > 0) {
+                await interaction.editReply(fullResponse.slice(0, 2000));
+                lastUpdateTime = now;
+              }
+            }
+          }
+
+          if (fullResponse.length > 0) {
+            await interaction.editReply(fullResponse.slice(0, 2000));
+          }
+
+          conversations[userId].push({ role: "assistant", content: fullResponse });
+        } else {
+          const response = await userOpenAI.chat.completions.create({
+            model: userConfig.model || "google/gemini-2.0-flash-001", // 使用用户配置的模型
+            messages: apiMessages,
+            max_tokens: userConfig.max_tokens || 2048,
+            temperature: userConfig.temperature || 1.0,
+            top_p: userConfig.top_p || 0.9,
+          });
+          const aiResponse = response.choices[0].message.content;
+          conversations[userId].push({ role: "assistant", content: aiResponse });
+
+          let replyContent = `${aiResponse}`;
+          if (replyContent.length > 2000) {
+            replyContent = replyContent.substring(0, 1997) + "...";
+          }
+          await interaction.editReply({ content: replyContent });
+        }
 
         // 如果对话历史太长，删除最早的消息（保留 system 消息）
         if (conversations[userId].length > MAX_HISTORY_LENGTH + 1) {
@@ -429,18 +464,6 @@ client.on("interactionCreate", async (interaction) => {
             ...conversations[userId].slice(-MAX_HISTORY_LENGTH),
           ];
         }
-
-        // 发送回复
-        let replyContent = `${aiResponse}`;
-
-        // 如果消息太长，Discord可能会拒绝发送
-        if (replyContent.length > 2000) {
-          replyContent = replyContent.substring(0, 1997) + "...";
-        }
-
-        await interaction.editReply({
-          content: replyContent,
-        });
       } catch (error) {
         console.error("Error calling OpenAI API:", error);
         await interaction.editReply({

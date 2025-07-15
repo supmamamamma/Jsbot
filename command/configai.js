@@ -20,7 +20,8 @@ const DEFAULT_CONFIG = {
   temperature: 1.0,
   top_p: 0.9,
   max_tokens: 2048,
-  apiKey: null
+  apiKey: null,
+  stream: false
 };
 
 // 加载AI配置
@@ -106,6 +107,10 @@ const configAICommand = {
         .setMaxValue(8192)
         .setRequired(false))
     .addBooleanOption(option =>
+      option.setName('stream')
+        .setDescription('Enable or disable streaming response')
+        .setRequired(false))
+    .addBooleanOption(option =>
       option.setName('reset')
         .setDescription('Reset to default settings')
         .setRequired(false)),
@@ -148,6 +153,9 @@ const configAICommand = {
     
     const max_tokens = interaction.options.getInteger('max_tokens');
     if (max_tokens !== null) newConfig.max_tokens = max_tokens;
+
+    const stream = interaction.options.getBoolean('stream');
+    if (stream !== null) newConfig.stream = stream;
     
     // 如果没有提供任何参数，显示当前配置
     if (Object.keys(newConfig).length === 0) {
@@ -159,7 +167,8 @@ const configAICommand = {
         .addField('Model', currentConfig.model || 'Not set')
         .addField('Temperature', String(currentConfig.temperature || 'Not set'))
         .addField('Top P', String(currentConfig.top_p || 'Not set'))
-        .addField('Max Tokens', String(currentConfig.max_tokens || 'Not set'));
+        .addField('Max Tokens', String(currentConfig.max_tokens || 'Not set'))
+        .addField('Stream', String(currentConfig.stream || 'Not set'));
       
       await interaction.reply({
         embeds: [embed],
@@ -180,6 +189,7 @@ const configAICommand = {
     if (newConfig.temperature !== undefined) replyContent += `- Temperature: ${newConfig.temperature}\n`;
     if (newConfig.top_p !== undefined) replyContent += `- Top P: ${newConfig.top_p}\n`;
     if (newConfig.max_tokens !== undefined) replyContent += `- Max Tokens: ${newConfig.max_tokens}\n`;
+    if (newConfig.stream !== undefined) replyContent += `- Stream: ${newConfig.stream}\n`;
     
     await interaction.reply({
       content: replyContent,
