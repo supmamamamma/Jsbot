@@ -4,7 +4,8 @@
   "description": "A Discord bot that uses OpenAI to respond to messages.",
   "main": "oldbot.js",
   "scripts": {
-    "start": "node oldbot.js"
+    "start": "node oldbot.js",
+    "check:discord": "node scripts/check-discord-version.js"
   },
   "keywords": [
     "discord",
