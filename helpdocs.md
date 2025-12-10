@@ -4,7 +4,7 @@
 
 ## 一、环境要求
 
-- Node.js >= 16
+- Node.js >= 20
 - 一个已创建好的 Discord Bot（在 Discord 开发者平台）
 - 一个有效的 OpenAI API Key
 
